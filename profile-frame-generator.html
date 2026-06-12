@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Maker - BICM Cyber Team</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+:root {
+  --bg:#f8fbf8; --surface:#ffffff; --surface2:#eef7ed; --border:#d8e9d4;
+  --accent:#16a34a; --accent2:#4ade80; --glow:rgba(16,163,74,.18);
+  --text:#0f172a; --dim:#475569; --ok:#16a34a; --err:#dc2626; --r:16px;
+  --bn:'Hind Siliguri',sans-serif; --en:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--bn);min-height:100vh}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;
+  background:#ffffff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center}
+.logo-text{font-family:var(--en);font-weight:700;font-size:18px;color:var(--text)}
+.logo-text span{color:var(--accent)}
+.site-nav{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+.site-nav a{display:inline-flex;align-items:center;justify-content:center;padding:9px 14px;border-radius:999px;border:1px solid transparent;text-decoration:none;color:var(--text);font-size:14px;font-weight:600;transition:all .2s;background:rgba(16,163,74,.08)}
+.site-nav a:hover{background:var(--accent);color:#fff;border-color:rgba(16,163,74,.3)}
+.mode-toggle{display:flex;gap:6px;background:rgba(16,163,74,.08);border-radius:12px;padding:5px;flex-wrap:wrap;justify-content:flex-end}
+.mode-btn{padding:8px 18px;border:1px solid transparent;cursor:pointer;border-radius:10px;font-size:14px;
+  font-family:var(--bn);font-weight:600;transition:all .2s;color:var(--dim);background:transparent;min-width:120px}
+.mode-btn:hover{border-color:rgba(16,163,74,.3);}
+.mode-btn.active{background:var(--accent);color:#fff;box-shadow:0 0 18px var(--glow)}
+
+main{max-width:1200px;margin:0 auto;padding:28px 20px}
+.page{display:none}.page.active{display:block}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.ttl{font-size:16px;font-weight:700;margin-bottom:4px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:14px}
+
+/* banner */
+.banner{background:linear-gradient(135deg,rgba(134,239,172,.34),rgba(209,250,229,.5));
+  border:1px solid rgba(16,163,74,.2);border-radius:var(--r);padding:18px 22px;
+  margin-bottom:22px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 12px 30px rgba(16,163,74,.08)}
+.b-icon{width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(16,163,74,.12)}
+.b-icon svg{width:24px;height:24px;fill:var(--accent)}
+.b-title{font-weight:700;font-size:16px;color:var(--text)}
+.b-desc{color:var(--dim);font-size:14px;margin-top:3px}
+
+/* upload zone */
+.upzone{border:2px dashed var(--border);border-radius:var(--r);padding:32px 20px;
+  text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.upzone:hover,.upzone.drag{border-color:var(--accent);background:rgba(16,163,74,.08)}
+.upzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.up-icon{font-size:36px;margin-bottom:10px}
+.up-lbl{font-size:15px;font-weight:600;margin-bottom:4px}
+.up-hint{font-size:12px;color:var(--dim)}
+
+/* frame grid */
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.foption{aspect-ratio:1;border-radius:10px;border:2px solid var(--border);cursor:pointer;
+  overflow:hidden;position:relative;transition:all .2s;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center}
+.foption:hover{border-color:var(--accent)}
+.foption.sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.foption img{width:100%;height:100%;object-fit:cover}
+.foption .chk{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;display:none;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.foption.sel .chk{display:flex}
+.nolabel{font-size:12px;color:var(--dim);text-align:center;padding:6px}
+
+/* user layout */
+.ulayout{display:grid;grid-template-columns:320px 1fr;gap:22px;align-items:start}
+@media(max-width:860px){.ulayout{grid-template-columns:1fr}}
+
+@media(max-width:760px){
+  .agrid{grid-template-columns:1fr}
+  header{justify-content:center;text-align:center;padding:16px 18px}
+  .logo{width:100%;justify-content:center}
+  .mode-toggle{width:100%;justify-content:center}
+  .mode-btn{flex:1;min-width:0}
+}
+
+@media(max-width:640px){
+  .banner{flex-direction:column;align-items:flex-start}
+  .banner .b-desc{margin-top:6px}
+  .donate-section,.footer{flex-direction:column;align-items:stretch}
+  .donate-actions{justify-content:flex-start}
+  .footer .footer-links{justify-content:center}
+  .footer .footer-meta{width:100%}
+  .ctrls{grid-template-columns:1fr}
+  .arow{flex-direction:column}
+  .arow .btn{width:100%}
+  .upzone{padding:24px 18px}
+  .card{padding:18px}
+}
+
+@media(max-width:520px){
+  body{font-size:14px}
+  header{padding:14px 14px}
+  .logo-text{font-size:16px}
+  .mode-toggle{gap:4px}
+  .mode-btn{padding:10px 12px;font-size:13px}
+  .banner{padding:16px 18px}
+  .donate-section{padding:18px 18px}
+  .footer{padding:18px 16px 20px}
+  .footer .footer-links a{padding:10px 12px;font-size:13px}
+}
+
+/* canvas */
+.cwrap{background:var(--surface2);border-radius:var(--r);border:1px solid var(--border);
+  padding:22px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.cring{position:relative;width:100%;max-width:320px;aspect-ratio:1 / 1;border-radius:50%;overflow:hidden;
+  background:#111;box-shadow:0 0 0 4px var(--border);cursor:move;user-select:none;flex-shrink:0}
+#photoCanvas{position:absolute;top:0;left:0;width:100%;height:100%;touch-action:none}
+
+.ctrls{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cg{display:flex;flex-direction:column;gap:5px}
+.clbl{font-size:11px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+input[type=range]{-webkit-appearance:none;appearance:none;-moz-appearance:none;width:100%;height:5px;background:var(--border);
+  border-radius:4px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 8px var(--glow)}
+.arow{display:flex;gap:10px;width:100%;flex-wrap:wrap}
+.arow .btn{flex:1;justify-content:center}
+
+/* admin */
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:760px){.agrid{grid-template-columns:1fr}}
+@media(max-width:620px){.fgrid{grid-template-columns:1fr}}
+.fg{margin-bottom:16px}
+.flbl{font-size:12px;font-weight:600;color:var(--dim);margin-bottom:7px;display:block;
+  text-transform:uppercase;letter-spacing:.05em}
+.finput{width:100%;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-family:var(--bn);font-size:14px;
+  transition:border-color .2s;outline:none}
+.finput:focus{border-color:var(--accent)}
+textarea.finput{resize:vertical;min-height:75px}
+
+/* frame list */
+.flist{display:flex;flex-direction:column;gap:10px}
+.fitem{display:flex;align-items:flex-start;gap:12px;background:var(--surface2);
+  border-radius:10px;padding:12px 14px;border:1px solid var(--border);transition:border-color .2s}
+.fitem.pending{border-color:var(--err);background:rgba(239,68,68,.05)}
+.fthumb{width:50px;height:50px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--border)}
+.fname{font-weight:600;font-size:14px}
+.fmeta{font-size:12px;color:var(--dim);margin-top:2px}
+.factions{display:flex;gap:7px;flex-shrink:0;margin-left:auto;align-items:center}
+.bico{width:32px;height:32px;border:1px solid var(--border);background:transparent;
+  border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--dim);transition:all .2s}
+.bico:hover{border-color:var(--err);color:var(--err)}
+.bico.edit:hover{border-color:var(--accent);color:var(--accent)}
+.confirm-row{margin-top:7px;font-size:13px;color:var(--err);font-weight:600}
+.confirm-row button{margin-left:7px;padding:3px 11px;border:none;border-radius:6px;
+  cursor:pointer;font-size:12px;font-family:var(--bn)}
+.btn-yes{background:var(--err);color:#fff}
+.btn-no{background:var(--surface);color:var(--text);border:1px solid var(--border) !important}
+
+/* badge */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.b-ok{background:rgba(34,197,94,.15);color:var(--ok)}
+.b-off{background:rgba(239,68,68,.15);color:var(--err)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border:none;
+  cursor:pointer;border-radius:10px;font-family:var(--bn);font-size:14px;font-weight:600;transition:all .2s}
+.btn-p{background:var(--accent);color:#fff}
+.btn-p:hover{box-shadow:0 0 20px var(--glow);transform:translateY(-1px)}
+.btn-s{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-s:hover{border-color:var(--accent)}
+.btn-g{background:var(--ok);color:#fff}
+.btn-full{width:100%;justify-content:center}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;
+  align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:26px;width:330px;max-width:92vw}
+.modal-t{font-size:18px;font-weight:700;margin-bottom:5px}
+.modal-s{color:var(--dim);font-size:14px;margin-bottom:18px}
+
+/* toast */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:var(--surface2);border:1px solid var(--border);padding:11px 20px;
+  border-radius:10px;font-size:14px;font-weight:500;opacity:0;transition:all .35s;
+  z-index:999;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.tok{border-color:var(--ok);color:var(--ok)}
+#toast.terr{border-color:var(--err);color:var(--err)}
+
+.donate-section{max-width:1200px;margin:0 auto 18px;padding:20px 24px;background:linear-gradient(135deg,rgba(220,252,231,.9),rgba(134,239,172,.45));border:1px solid rgba(16,163,74,.22);border-radius:20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;color:var(--text);box-shadow:0 20px 50px rgba(16,163,74,.08)}
+.donate-info{max-width:760px}
+.donate-info .ttl{font-size:18px;margin-bottom:6px;color:var(--text)}
+.donate-info .sub{color:var(--dim);font-size:14px;margin-bottom:10px}
+.donate-actions{display:flex;flex-wrap:wrap;gap:12px}
+.donate-actions a{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:999px;font-size:14px;font-weight:700;text-decoration:none;transition:all .2s}
+.donate-actions .btn-primary{background:var(--accent);color:#fff;box-shadow:0 12px 24px rgba(16,163,74,.16)}
+.donate-actions .btn-secondary{background:rgba(16,163,74,.12);color:var(--text);border:1px solid rgba(16,163,74,.2)}
+.donate-actions .btn-primary:hover{transform:translateY(-1px);}
+.donate-actions .btn-secondary:hover{background:rgba(16,163,74,.18);}
+.copy-item{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:14px;border:1px solid rgba(16,163,74,.2);background:rgba(255,255,255,.95);cursor:pointer;transition:all .2s;max-width:100%}
+.copy-item:hover{background:rgba(16,163,74,.08);border-color:var(--accent)}
+.copy-item strong{font-weight:700}
+.copy-item .copy-value{font-size:14px;color:var(--accent);font-weight:700}
+.copy-item .copy-tip{font-size:12px;color:var(--dim);margin-left:auto}
+
+.footer{max-width:1200px;margin:0 auto;padding:24px 26px 28px;background:#ffffff;border:1px solid rgba(16,163,74,.16);border-radius:20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;color:var(--dim);font-size:13px;box-shadow:0 14px 45px rgba(16,163,74,.08)}
+.footer .footer-note{flex:1;min-width:240px;color:var(--text);font-size:14px;line-height:1.6}
+.footer .footer-meta{display:flex;flex-direction:column;gap:6px}
+.footer .footer-links{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.footer .footer-links a{color:var(--accent);text-decoration:none;padding:8px 14px;border-radius:999px;border:1px solid transparent;transition:all .2s;background:rgba(16,163,74,.08)}
+.footer .footer-links a:hover{background:rgba(16,163,74,.18);border-color:rgba(16,163,74,.3);color:#fff}
+.footer .footer-donate{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;box-shadow:0 10px 24px rgba(16,163,74,.24);}
+.footer .footer-donate:hover{transform:translateY(-1px);}
+.footer .footer-note small{color:var(--dim);font-size:12px}
+.empty{text-align:center;padding:36px 20px;color:var(--dim)}
+.empty-i{font-size:38px;margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon"><img src="" alt=""></div>
+    <div class="logo-text">BICM <span>Frame Maker</span></div>
+  </div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btnUser" onclick="switchMode('user')">ব্যবহারকারী</button>
+    <button class="mode-btn" id="btnAdmin" onclick="openAdminModal()">অ্যাডমিন</button>
+  </div>
+</header>
+
+<!-- Admin password modal -->
+<div class="overlay" id="adminModal">
+  <div class="modal">
+    <div class="modal-t">অ্যাডমিন প্রবেশ</div>
+    <div class="modal-s">পাসওয়ার্ড দিয়ে অ্যাডমিন প্যানেলে প্রবেশ করুন</div>
+    <div class="fg">
+      <label class="flbl">পাসওয়ার্ড</label>
+      <input type="password" class="finput" id="passInput" placeholder="পাসওয়ার্ড লিখুন...">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn btn-p" id="passOkBtn">প্রবেশ করুন</button>
+      <button class="btn btn-s" id="passCancelBtn">বাতিল</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- USER PAGE -->
+<div class="page active" id="userPage">
+  <div class="banner" id="evBanner">
+    <div class="b-icon" id="bIcon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2-3.8-3.7 5.2-.8L12 4.5z"/></svg></div>
+    <div>
+      <div class="b-title" id="bTitle">আপনার প্রোফাইল ফটো সাজান</div>
+      <div class="b-desc" id="bDesc">পছন্দের ফ্রেম বেছে নিন, ছবি আপলোড করুন এবং ফেসবুকের জন্য তৈরি করুন।</div>
+    </div>
+  </div>
+
+  <div class="ulayout">
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <div class="card">
+      <div class="ttl">আপনার ছবি</div>
+        <div class="sub">JPG বা PNG ফরম্যাট</div>
+        <div class="upzone" id="photoZone">
+          <input type="file" accept="image/*" id="photoFile">
+          <div class="up-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 5l4 4h-3v6h-2V9H8l4-4zm6 11v2H6v-2H4v2c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-2h-2z"/></svg></div>
+          <div class="up-lbl">ছবি আপলোড করুন</div>
+          <div class="up-hint">ড্র্যাগ করুন বা ক্লিক করুন</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ttl">ফ্রেম বেছে নিন</div>
+        <div class="sub">পছন্দের ফ্রেমে ক্লিক করুন</div>
+        <div class="fgrid" id="framePicker"></div>
+      </div>
+
+    </div>
+
+    <div class="cwrap">
+      <div style="width:100%;font-weight:700;font-size:15px"> প্রিভিউ ও সম্পাদনা</div>
+      <div class="cring" id="cring">
+        <canvas id="photoCanvas" width="500" height="500"></canvas>
+      </div>
+      <div style="font-size:12px;color:var(--dim);text-align:center">
+        ছবির উপর ড্র্যাগ করে সরান • স্ক্রল করে জুম করুন
+      </div>
+      <div class="ctrls">
+        <div class="cg"><div class="clbl">জুম</div>
+          <input type="range" id="rZoom" min="50" max="300" value="100"></div>
+        <div class="cg"><div class="clbl">X অবস্থান</div>
+          <input type="range" id="rX" min="-250" max="250" value="0"></div>
+        <div class="cg"><div class="clbl">Y অবস্থান</div>
+          <input type="range" id="rY" min="-250" max="250" value="0"></div>
+        <div class="cg"><div class="clbl">ঘোরান</div>
+          <input type="range" id="rRot" min="-180" max="180" value="0"></div>
+      </div>
+      <div class="arow">
+        <button class="btn btn-s" id="resetBtn">রিসেট</button>
+        <button class="btn btn-p" id="dlBtn">ডাউনলোড</button>
+      </div>
+      <div style="font-size:12px;color:var(--dim);text-align:center;margin-top:-6px">
+        ফেসবুক প্রোফাইল ফটো (500×500 px)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="adminPage">
+  <div style="font-size:20px;font-weight:700;margin-bottom:4px">অ্যাডমিন প্যানেল</div>
+  <div style="color:var(--dim);font-size:13px;margin-bottom:24px">ফ্রেম পরিচালনা ও সাইটের তথ্য আপডেট করুন</div>
+
+  <div class="agrid">
+    <div class="card">
+      <div class="ttl">নতুন ফ্রেম যোগ করুন</div>
+      <div class="sub" style="margin-bottom:16px">PNG (স্বচ্ছ ব্যাকগ্রাউন্ড) সবচেয়ে ভালো</div>
+      <div class="fg">
+        <label class="flbl">ফ্রেমের নাম</label>
+        <input type="text" class="finput" id="newName" placeholder="যেমন: ঈদ মোবারক ২০২৫">
+      </div>
+      <div class="fg">
+        <label class="flbl">ফ্রেম ইমেজ</label>
+        <div class="upzone" id="frameZone" style="padding:22px 16px">
+          <input type="file" accept="image/png,image/gif,image/webp" id="frameFile">
+          <div class="up-icon" id="fzIcon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 5l4 4h-3v6h-2V9H8l4-4zm6 11v2H6v-2H4v2c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-2h-2z"/></svg></div>
+          <div class="up-lbl">ফ্রেম ইমেজ আপলোড</div>
+          <div class="up-hint">PNG স্বচ্ছ ব্যাকগ্রাউন্ড</div>
+        </div>
+        <img id="framePreview" style="display:none;width:72px;height:72px;border-radius:8px;margin-top:10px;object-fit:cover">
+      </div>
+      <button class="btn btn-p btn-full" id="addFrameBtn">ফ্রেম যোগ করুন</button>
+    </div>
+
+    <div class="card">
+      <div class="ttl">ব্যানার ও তথ্য</div>
+      <div class="sub" style="margin-bottom:16px">ব্যবহারকারীদের জন্য বার্তা সেট করুন</div>
+      <div class="fg">
+        <label class="flbl">শিরোনাম</label>
+        <input type="text" class="finput" id="aTitle" placeholder="যেমন: ঈদ মোবারক!">
+      </div>
+      <div class="fg">
+        <label class="flbl">বিবরণ</label>
+        <textarea class="finput" id="aDesc" placeholder="ব্যবহারকারীদের জন্য নির্দেশনা..."></textarea>
+      </div>
+      <div class="fg">
+        <label class="flbl">আইকন</label>
+        <input type="text" class="finput" id="aIcon" placeholder="" maxlength="4" style="max-width:90px">
+      </div>
+      <button class="btn btn-g btn-full" id="saveBannerBtn">তথ্য সেভ করুন</button>
+    </div>
+
+    <div class="card" style="grid-column:span 2">
+      <div class="ttl" style="margin-bottom:16px">ফ্রেম তালিকা</div>
+      <div class="flist" id="adminList"></div>
+    </div>
+  </div>
+</div>
+
+</main>
+<section class="donate-section" id="donate">
+  <div class="donate-info">
+    <div class="ttl">আপনার সমর্থন আমাদের জন্য মূল্যবান</div>
+    <div class="sub">এই টুলটিকে তাজা রাখা, নতুন ফিচার যোগ করা এবং সার্ভার খরচ চালাতে আপনার সহায়তা দরকার।</div>
+    <div style="margin-top:14px;color:var(--text);font-size:14px;line-height:1.7;display:grid;gap:10px;">
+      <div class="copy-item" data-copy="01575130424" onclick="copyPayment(this)">
+        <strong>bKash (Personal):</strong>
+        <span class="copy-value">01575130424</span>
+        <span class="copy-tip">ক্লিক করে কপি করুন</span>
+      </div>
+      <div class="copy-item" data-copy="01575130424" onclick="copyPayment(this)">
+        <strong>Nagad (Personal) :</strong>
+        <span class="copy-value">01575130424</span>
+        <span class="copy-tip">ক্লিক করে কপি করুন</span>
+      </div>
+    </div>
+  </div>
+  <div class="donate-actions">
+    <a href="https://www.supportkori.com/bicmcyberteam" target="_blank" class="btn-primary">Donate Now</a>
+    <a href="mailto:cyberbdtech@gmail.com" class="btn-secondary">আমাদের সাথে যোগাযোগ</a>
+  </div>
+</section>
+<footer class="footer">
+  <div class="footer-meta">
+    <div class="footer-note">© 2026 BICM Cyber Team · প্রোফাইল মেকার</div>
+    <small>সহজ, নিরাপদ এবং ফ্রেম-ফাস্ট প্রোফাইল ছবি তৈরি করুন।</small>
+  </div>
+  <div class="footer-links">
+    <a href="https://chhatra-majlis.org.bd/" target="_blank">ওয়েবসাইট</a>
+    <a href="https://www.supportkori.com/bicmcyberteam" target="_blank" class="footer-donate">Donate</a>
+    <a href="#" onclick="switchMode('user');return false;">ব্যবহারকারী</a>
+    <a href="#" onclick="openAdminModal();return false;">অ্যাডমিন</a>
+  </div>
+</footer>
+<div id="toast"></div>
+
+<script>
+// ── state ──
+var frames = [];
+var banner = { icon:'', title:'আপনার প্রোফাইল ফটো সাজান', desc:'পছন্দের ফ্রেম বেছে নিন, ছবি আপলোড করুন এবং ফেসবুকের জন্য তৈরি করুন।' };
+var selIdx = -1;
+var userPhoto = null;
+var pX=0, pY=0, pS=100, pR=0;
+var drag=false, dSX, dSY, dPX, dPY;
+var pendingDel = null;
+var newFrameUrl = null;
+var PASS = 'BICM1990';
+
+// ── load storage ──
+try {
+  var sf = localStorage.getItem('fs_frames');
+  if (sf) frames = JSON.parse(sf);
+  var sb = localStorage.getItem('fs_banner');
+  if (sb) banner = JSON.parse(sb);
+} catch(e) {}
+
+if (!frames.length) {
+  frames = [
+    { name:'ঈদ মোবারক', url:svgFrame('#4CAF50','#81C784',''), on:true },
+    { name:'জাতীয় দিবস', url:svgFrame('#e53935','#ef9a9a',''), on:true },
+    { name:'বিশেষ উপলক্ষ', url:svgFrame('#7c3aed','#a78bfa',''), on:true },
+    { name:'জন্মদিন', url:svgFrame('#f59e0b','#fcd34d',''), on:true }
+  ];
+  save();
+}
+
+function svgFrame(c1,c2,em) {
+  var s = '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">'
+    + '<defs><mask id="m"><rect width="500" height="500" fill="white"/>'
+    + '<circle cx="250" cy="250" r="210" fill="black"/></mask></defs>'
+    + '<circle cx="250" cy="250" r="250" fill="' + c1 + '" mask="url(#m)"/>'
+    + '<circle cx="250" cy="250" r="248" fill="none" stroke="' + c2 + '" stroke-width="6" stroke-dasharray="18,9"/>'
+    + '<text x="250" y="42" text-anchor="middle" font-size="34">' + em + '</text>'
+    + '<text x="250" y="476" text-anchor="middle" font-size="34">' + em + '</text>'
+    + '<text x="24" y="262" text-anchor="middle" font-size="34">' + em + '</text>'
+    + '<text x="476" y="262" text-anchor="middle" font-size="34">' + em + '</text>'
+    + '</svg>';
+  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(s)));
+}
+
+function save() {
+  try { localStorage.setItem('fs_frames', JSON.stringify(frames)); } catch(e) {}
+  try { localStorage.setItem('fs_banner', JSON.stringify(banner)); } catch(e) {}
+}
+
+// ── canvas ──
+var cv = document.getElementById('photoCanvas');
+var cx = cv.getContext('2d');
+
+function draw() {
+  cx.clearRect(0,0,500,500);
+  cx.save();
+  cx.beginPath();
+  cx.arc(250,250,248,0,Math.PI*2);
+  cx.clip();
+  if (userPhoto) {
+    cx.save();
+    cx.translate(250+pX, 250+pY);
+    cx.rotate(pR*Math.PI/180);
+    var w=userPhoto.naturalWidth||userPhoto.width, h=userPhoto.naturalHeight||userPhoto.height;
+    var sz=Math.max(w,h);
+    var dw=(w/sz)*500*(pS/100), dh=(h/sz)*500*(pS/100);
+    cx.drawImage(userPhoto,-dw/2,-dh/2,dw,dh);
+    cx.restore();
+  } else {
+    cx.fillStyle='#1e2230'; cx.fillRect(0,0,500,500);
+    cx.font='72px serif'; cx.textAlign='center'; cx.fillStyle='#3a3f52';
+    cx.fillText('ছবি',250,278);
+    cx.font='500 17px "Hind Siliguri",sans-serif'; cx.fillStyle='#8890a8';
+    cx.fillText('ছবি আপলোড করুন',250,336);
+  }
+  cx.restore();
+  if (selIdx>=0 && frames[selIdx]) {
+    var fi=new Image(); fi.crossOrigin='anonymous';
+    fi.onload=function(){ cx.drawImage(fi,0,0,500,500); };
+    fi.src=frames[selIdx].url;
+  }
+}
+
+function resetEdit() {
+  pX=0;pY=0;pS=100;pR=0;
+  document.getElementById('rZoom').value=100;
+  document.getElementById('rX').value=0;
+  document.getElementById('rY').value=0;
+  document.getElementById('rRot').value=0;
+  draw();
+}
+
+document.getElementById('rZoom').oninput=function(){ pS=+this.value; draw(); };
+document.getElementById('rX').oninput=function(){ pX=+this.value; draw(); };
+document.getElementById('rY').oninput=function(){ pY=+this.value; draw(); };
+document.getElementById('rRot').oninput=function(){ pR=+this.value; draw(); };
+document.getElementById('resetBtn').onclick=resetEdit;
+
+// drag
+cv.addEventListener('mousedown',function(e){ drag=true; dSX=e.clientX; dSY=e.clientY; dPX=pX; dPY=pY; });
+document.addEventListener('mousemove',function(e){
+  if(!drag) return;
+  var r=cv.getBoundingClientRect(), sc=500/r.width;
+  pX=Math.max(-250,Math.min(250, dPX+(e.clientX-dSX)*sc));
+  pY=Math.max(-250,Math.min(250, dPY+(e.clientY-dSY)*sc));
+  document.getElementById('rX').value=pX;
+  document.getElementById('rY').value=pY;
+  draw();
+});
+document.addEventListener('mouseup',function(){ drag=false; });
+cv.addEventListener('touchstart',function(e){ e.preventDefault(); var t=e.touches[0]; drag=true; dSX=t.clientX; dSY=t.clientY; dPX=pX; dPY=pY; },{passive:false});
+document.addEventListener('touchmove',function(e){
+  if(!drag) return;
+  var t=e.touches[0], r=cv.getBoundingClientRect(), sc=500/r.width;
+  pX=Math.max(-250,Math.min(250, dPX+(t.clientX-dSX)*sc));
+  pY=Math.max(-250,Math.min(250, dPY+(t.clientY-dSY)*sc));
+  document.getElementById('rX').value=pX;
+  document.getElementById('rY').value=pY;
+  draw();
+},{passive:true});
+document.addEventListener('touchend',function(){ drag=false; });
+cv.addEventListener('wheel',function(e){
+  e.preventDefault();
+  pS=Math.max(50,Math.min(300,pS-e.deltaY*0.2));
+  document.getElementById('rZoom').value=pS;
+  draw();
+},{passive:false});
+
+// photo upload
+document.getElementById('photoFile').onchange=function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(ev){ var img=new Image(); img.onload=function(){ userPhoto=img; resetEdit(); }; img.src=ev.target.result; };
+  rd.readAsDataURL(f);
+};
+
+// download — square PNG, no circular clip; Facebook crops to circle itself
+document.getElementById('dlBtn').onclick=function(){
+  if(!userPhoto){ toast('প্রথমে ছবি আপলোড করুন','terr'); return; }
+  var oc=document.createElement('canvas'); oc.width=500; oc.height=500;
+  var ox=oc.getContext('2d');
+  ox.fillStyle='#ffffff'; ox.fillRect(0,0,500,500);
+  ox.save();
+  ox.translate(250+pX,250+pY); ox.rotate(pR*Math.PI/180);
+  var w=userPhoto.naturalWidth||userPhoto.width, h=userPhoto.naturalHeight||userPhoto.height;
+  var sz=Math.max(w,h);
+  var dw=(w/sz)*500*(pS/100), dh=(h/sz)*500*(pS/100);
+  ox.drawImage(userPhoto,-dw/2,-dh/2,dw,dh); ox.restore();
+  function doDownload(){
+    var a=document.createElement('a'); a.download='profile-photo.png'; a.href=oc.toDataURL('image/png'); a.click();
+    toast(' ডাউনলোড শুরু হয়েছে!','tok');
+  }
+  if(selIdx>=0 && frames[selIdx]){
+    var fi=new Image(); fi.crossOrigin='anonymous';
+    fi.onload=function(){ ox.drawImage(fi,0,0,500,500); doDownload(); };
+    fi.onerror=function(){ doDownload(); };
+    fi.src=frames[selIdx].url;
+  } else { doDownload(); }
+};
+
+// ── frame picker ──
+function renderPicker() {
+  var g=document.getElementById('framePicker'); g.innerHTML='';
+  var d=document.createElement('div');
+  d.className='foption'+(selIdx===-1?' sel':'');
+  d.innerHTML='<div class="chk">✓</div><div class="nolabel">✕<br>ফ্রেম ছাড়া</div>';
+  d.onclick=function(){ selIdx=-1; renderPicker(); draw(); };
+  g.appendChild(d);
+  frames.forEach(function(f,i){
+    if(!f.on) return;
+    var el=document.createElement('div');
+    el.className='foption'+(selIdx===i?' sel':'');
+    el.innerHTML='<div class="chk">✓</div><img src="'+f.url+'" alt="'+f.name+'">';
+    el.onclick=function(){ selIdx=i; renderPicker(); draw(); };
+    g.appendChild(el);
+  });
+}
+
+// ── banner ──
+function applyBanner() {
+  document.getElementById('bIcon').textContent='';
+  document.getElementById('bTitle').textContent=banner.title||'';
+  document.getElementById('bDesc').textContent=banner.desc||'';
+  document.getElementById('aTitle').value=banner.title||'';
+  document.getElementById('aDesc').value=banner.desc||'';
+  document.getElementById('aIcon').value=banner.icon||'';
+}
+document.getElementById('saveBannerBtn').onclick=function(){
+  banner.title=document.getElementById('aTitle').value||banner.title;
+  banner.desc=document.getElementById('aDesc').value||banner.desc;
+  banner.icon=document.getElementById('aIcon').value||banner.icon;
+  save(); applyBanner(); toast('তথ্য সেভ হয়েছে','tok');
+};
+
+// ── admin frame list ──
+function renderAdminList() {
+  var list=document.getElementById('adminList'); list.innerHTML='';
+  if(!frames.length){
+    list.innerHTML='<div class="empty"><div class="empty-i">✉</div><div>কোনো ফ্রেম নেই।</div></div>'; return;
+  }
+  frames.forEach(function(f,i){
+    var item=document.createElement('div');
+    item.className='fitem'+(pendingDel===i?' pending':'');
+
+    var thumb=document.createElement('img');
+    thumb.className='fthumb'; thumb.src=f.url; thumb.alt=f.name;
+
+    var info=document.createElement('div'); info.style.flex='1';
+    info.innerHTML='<div class="fname">'+f.name+'</div>'
+      +'<div class="fmeta">ফ্রেম #'+(i+1)+' &nbsp;•&nbsp; <span class="badge '+(f.on?'b-ok':'b-off')+'">'+(f.on?'সক্রিয়':'নিষ্ক্রিয়')+'</span></div>';
+
+    if(pendingDel===i){
+      var cr=document.createElement('div'); cr.className='confirm-row';
+      cr.appendChild(document.createTextNode('সত্যিই মুছবেন?'));
+      var yBtn=document.createElement('button'); yBtn.className='btn-yes'; yBtn.textContent='হ্যাঁ, মুছুন';
+      (function(idx){ yBtn.onclick=function(){ doDelete(idx); }; })(i);
+      var nBtn=document.createElement('button'); nBtn.className='btn-no'; nBtn.textContent='বাতিল';
+      nBtn.onclick=function(){ pendingDel=null; renderAdminList(); };
+      cr.appendChild(yBtn); cr.appendChild(nBtn);
+      info.appendChild(cr);
+    }
+
+    var acts=document.createElement('div'); acts.className='factions';
+    var tBtn=document.createElement('button'); tBtn.className='bico edit';
+    tBtn.title=(f.on?'নিষ্ক্রিয়':'সক্রিয়')+' করুন';
+    tBtn.textContent=f.on?'On':'Off';
+    (function(idx){ tBtn.onclick=function(){ frames[idx].on=!frames[idx].on; save(); renderAdminList(); renderPicker(); }; })(i);
+
+    if(pendingDel!==i){
+      var dBtn=document.createElement('button'); dBtn.className='bico';
+      dBtn.title='মুছুন'; dBtn.textContent='DEL';
+      (function(idx){ dBtn.onclick=function(){ pendingDel=idx; renderAdminList(); }; })(i);
+      acts.appendChild(tBtn); acts.appendChild(dBtn);
+    } else {
+      acts.appendChild(tBtn);
+    }
+
+    item.appendChild(thumb); item.appendChild(info); item.appendChild(acts);
+    list.appendChild(item);
+  });
+}
+
+function doDelete(idx){
+  frames.splice(idx,1); save();
+  if(selIdx===idx) selIdx=-1;
+  else if(selIdx>idx) selIdx--;
+  pendingDel=null;
+  renderAdminList(); renderPicker(); draw();
+  toast('ফ্রেম মুছে ফেলা হয়েছে');
+}
+
+// ── add frame ──
+document.getElementById('frameFile').onchange=function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(ev){
+    newFrameUrl=ev.target.result;
+    var p=document.getElementById('framePreview');
+    p.src=newFrameUrl; p.style.display='block';
+    document.getElementById('fzIcon').style.display='none';
+  };
+  rd.readAsDataURL(f);
+};
+
+document.getElementById('addFrameBtn').onclick=function(){
+  var nm=document.getElementById('newName').value.trim();
+  if(!nm){ toast('ফ্রেমের নাম দিন','terr'); return; }
+  if(!newFrameUrl){ toast('ফ্রেম ইমেজ আপলোড করুন','terr'); return; }
+  frames.push({name:nm, url:newFrameUrl, on:true});
+  save(); newFrameUrl=null;
+  document.getElementById('newName').value='';
+  document.getElementById('frameFile').value='';
+  document.getElementById('framePreview').style.display='none';
+  document.getElementById('fzIcon').style.display='';
+  renderAdminList(); renderPicker();
+  toast('ফ্রেম যোগ হয়েছে','tok');
+};
+
+// ── mode switch ──
+function switchMode(m){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  if(m==='user'){
+    document.getElementById('userPage').classList.add('active');
+    document.getElementById('btnUser').classList.add('active');
+    document.getElementById('btnAdmin').classList.remove('active');
+  } else {
+    document.getElementById('adminPage').classList.add('active');
+    document.getElementById('btnAdmin').classList.add('active');
+    document.getElementById('btnUser').classList.remove('active');
+  }
+}
+
+// ── admin modal ──
+function openAdminModal(){
+  document.getElementById('adminModal').classList.add('open');
+  document.getElementById('passInput').value='';
+  setTimeout(function(){ document.getElementById('passInput').focus(); },80);
+}
+function closeAdminModal(){ document.getElementById('adminModal').classList.remove('open'); }
+document.getElementById('passOkBtn').onclick=function(){
+  if(document.getElementById('passInput').value===PASS){ closeAdminModal(); switchMode('admin'); }
+  else { toast('ভুল পাসওয়ার্ড','terr'); document.getElementById('passInput').value=''; }
+};
+document.getElementById('passCancelBtn').onclick=closeAdminModal;
+document.getElementById('passInput').onkeydown=function(e){ if(e.key==='Enter') document.getElementById('passOkBtn').click(); };
+
+function copyPayment(el){
+  var text=el && el.getAttribute && el.getAttribute('data-copy');
+  if(!text) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ toast(text+' কপি হয়েছে','tok'); }).catch(function(){ fallbackCopy(text); });
+  } else { fallbackCopy(text); }
+}
+
+function fallbackCopy(text){
+  var ta=document.createElement('textarea');
+  ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; ta.style.left='-9999px';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); toast(text+' কপি হয়েছে','tok'); }
+  catch(e){ toast('কপি করতে সমস্যা হয়েছে','terr'); }
+  document.body.removeChild(ta);
+}
+
+// ── toast ──
+var tTimer;
+function toast(msg,cls){
+  var t=document.getElementById('toast'); t.textContent=msg; t.className='show '+(cls||'');
+  clearTimeout(tTimer); tTimer=setTimeout(function(){ t.className=''; },2800);
+}
+
+// ── drag-over upload zones ──
+function setupDrop(zoneId, handler){
+  var el=document.getElementById(zoneId);
+  el.addEventListener('dragover',function(e){ e.preventDefault(); el.classList.add('drag'); });
+  el.addEventListener('dragleave',function(){ el.classList.remove('drag'); });
+  el.addEventListener('drop',function(e){
+    e.preventDefault(); el.classList.remove('drag');
+    var f=e.dataTransfer.files[0]; if(f) handler(f);
+  });
+}
+setupDrop('photoZone',function(f){
+  var rd=new FileReader(); rd.onload=function(ev){ var img=new Image(); img.onload=function(){ userPhoto=img; resetEdit(); }; img.src=ev.target.result; }; rd.readAsDataURL(f);
+});
+setupDrop('frameZone',function(f){
+  var rd=new FileReader(); rd.onload=function(ev){
+    newFrameUrl=ev.target.result;
+    var p=document.getElementById('framePreview'); p.src=newFrameUrl; p.style.display='block';
+    document.getElementById('fzIcon').style.display='none';
+  }; rd.readAsDataURL(f);
+});
+
+// ── init ──
+applyBanner();
+renderPicker();
+renderAdminList();
+draw();
+</script>
+<script 
+  src="https://www.supportkori.com/widget.js" 
+  data-id="bicmcyberteam" 
+  data-message="Support Cyber Team" 
+  data-color="#bbffb3" 
+  data-position="right"
+></script>
+</body>
+</html>
